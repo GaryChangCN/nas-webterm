@@ -1,0 +1,23 @@
+services:
+  webterm:
+    build: .
+    image: nas-webterm:local
+    restart: unless-stopped
+    ports:
+      - "${WEB_BIND_IP:-127.0.0.1}:${WEB_PORT:-7681}:7681"
+    environment:
+      TZ: ${TZ:-UTC}
+      TTYD_USER: ${TTYD_USER:-terminal}
+      TTYD_PASS: ${TTYD_PASS:?Set a strong TTYD_PASS in .env}
+    volumes:
+      - ./data/ssh:/root/.ssh
+      - ./data/share:/share
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
