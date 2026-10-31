@@ -18,3 +18,9 @@ id_ed25519*
 README.md
 SECURITY.md
 CONTRIBUTING.md
+node_modules/
+test-results/
+playwright-report/
+.generated/
+__pycache__/
+*.pyc

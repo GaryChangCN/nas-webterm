@@ -17,3 +17,9 @@ id_ed25519*
 compose-from-nas*
 .DS_Store
 Thumbs.db
+node_modules/
+test-results/
+playwright-report/
+.generated/
+__pycache__/
+*.pyc

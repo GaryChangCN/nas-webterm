@@ -1,0 +1,210 @@
+/* NAS Webterm: quiet, mobile-first terminal controls. */
+:root {
+  --nt-app-height: 100vh;
+  --nt-app-top: 0px;
+  --nt-header-h: 56px;
+  --nt-dock-h: 112px;
+  --nt-bg: #0b1018;
+  --nt-panel: #101720;
+  --nt-raised: #17202d;
+  --nt-border: #263244;
+  --nt-text: #e0e7f1;
+  --nt-muted: #8b9aaf;
+  --nt-accent: #a7adff;
+  --nt-mint: #7de0c2;
+  --nt-ui-font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --nt-mono-font: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+@supports (height: 100dvh) { :root { --nt-app-height: 100dvh; } }
+html.nt-enhanced, html.nt-enhanced body {
+  width: 100%; height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none;
+  background: var(--nt-bg); color: var(--nt-text); color-scheme: dark;
+}
+html.nt-enhanced body {
+  position: fixed; top: var(--nt-app-top); left: 0; width: 100%;
+  height: var(--nt-app-height); min-height: 0;
+  font-family: var(--nt-ui-font); -webkit-tap-highlight-color: transparent;
+}
+html.nt-enhanced [hidden] { display: none !important; }
+html.nt-enhanced #nt-header, html.nt-enhanced #nt-header *,
+html.nt-enhanced #nt-dock, html.nt-enhanced #nt-dock *,
+html.nt-enhanced #nt-paste-dialog, html.nt-enhanced #nt-paste-dialog *,
+html.nt-enhanced #nt-toast { box-sizing: border-box; }
+/* Body follows the JS viewport variables. Absolute children use local offsets. */
+html.nt-enhanced body #terminal-container {
+  position: absolute !important; inset: auto !important; top: var(--nt-header-h) !important; left: 0 !important;
+  width: 100% !important;
+  height: max(1px, calc(var(--nt-app-height) - var(--nt-header-h) - var(--nt-dock-h))) !important;
+  min-width: 0; min-height: 0; margin: 0 !important; padding: 0 !important;
+  overflow: hidden; box-sizing: border-box !important; background: var(--nt-bg);
+}
+html.nt-enhanced body #terminal-container .terminal {
+  width: 100% !important; height: 100% !important; min-width: 0; min-height: 0;
+  margin: 0 !important; padding: 12px !important; box-sizing: border-box !important;
+}
+html.nt-enhanced #terminal-container .xterm-viewport { scrollbar-width: thin; scrollbar-color: #344154 transparent; }
+html.nt-enhanced #terminal-container .xterm-viewport::-webkit-scrollbar { width: 7px; }
+html.nt-enhanced #terminal-container .xterm-viewport::-webkit-scrollbar-thumb { border: 2px solid var(--nt-bg); border-radius: 8px; background: #344154; }
+.nt-header {
+  position: absolute; z-index: 10; top: 0; left: 0; display: flex; align-items: center; gap: 20px;
+  width: 100%; min-height: 56px; padding: 6px 20px; border-bottom: 1px solid var(--nt-border); background: var(--nt-panel);
+}
+.nt-brand { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; }
+.nt-logo { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid #38435d; border-radius: 9px; background: #1c2538; color: var(--nt-accent); }
+.nt-logo svg { display: block; width: 20px; height: 20px; }
+.nt-brand-copy { display: flex; flex-direction: column; gap: 3px; }
+.nt-brand-copy strong { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; line-height: 1.2; white-space: nowrap; }
+.nt-brand-copy small { color: var(--nt-muted); font-size: 8px; font-weight: 500; letter-spacing: 1.65px; line-height: 1.2; white-space: nowrap; }
+.nt-status { display: flex; flex: 0 0 auto; align-items: center; gap: 7px; color: var(--nt-muted); font-size: 11px; white-space: nowrap; }
+.nt-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #8190a7; }
+.nt-status[data-state="connected"] .nt-status-dot { background: var(--nt-mint); box-shadow: 0 0 8px #7de0c236; }
+.nt-status[data-state="connecting"] .nt-status-dot { background: #e8c58a; animation: nt-breathe 1.8s ease-in-out infinite; }
+.nt-status[data-state="disconnected"] .nt-status-dot { background: #ef969f; box-shadow: 0 0 8px #ef969f20; }
+.nt-top-actions { display: flex; align-items: center; gap: 6px; min-width: 0; margin-left: auto; }
+.nt-button, .nt-key {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-width: 44px; min-height: 44px; margin: 0; padding: 0 14px; border: 1px solid var(--nt-border); border-radius: 8px;
+  background: var(--nt-raised); color: var(--nt-text); font-family: var(--nt-ui-font); font-size: 12px; font-weight: 500; line-height: 1;
+  text-decoration: none; white-space: nowrap; cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  transition: background-color 130ms ease, border-color 130ms ease, color 130ms ease, box-shadow 130ms ease;
+}
+.nt-icon-button { padding: 0 11px; border-color: transparent; background: transparent; color: #adbacd; }
+.nt-icon-button svg { display: block; flex: 0 0 auto; width: 18px; height: 18px; }
+.nt-button-label { font-size: 11px; }
+.nt-key .nt-button-label { font: inherit; }
+.nt-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.nt-button[aria-pressed="true"], .nt-key[aria-pressed="true"] { border-color: #777fc2; background: #2b3451; color: #e1e3ff; box-shadow: inset 0 0 0 1px #a7adff14; }
+.nt-button:focus-visible, .nt-key:focus-visible, .nt-dialog textarea:focus-visible, .nt-confirm input:focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 3px; }
+.nt-button:disabled, .nt-key:disabled { opacity: .4; box-shadow: none; cursor: not-allowed; }
+.nt-button:not(:disabled):active, .nt-key:not(:disabled):active { background: #303c51; border-color: #697a98; }
+.nt-button-primary, .nt-key-primary { border-color: #495b75; background: #24354a; color: #d6ecef; }
+.nt-touch-only, .nt-mobile-only { display: none; }
+#nt-reconnect { padding: 0 9px; font-size: 11px; }
+.nt-dock {
+  position: absolute; z-index: 10; top: calc(var(--nt-app-height) - var(--nt-dock-h)); left: 0; width: 100%;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--nt-border); background: var(--nt-panel);
+}
+.nt-dock-main { display: flex; align-items: stretch; justify-content: center; gap: 18px; width: 100%; max-width: 1040px; margin: 0 auto; }
+.nt-key-group { display: flex; align-items: stretch; gap: 6px; min-width: 0; }
+.nt-modifiers { flex: 5 1 0; }
+.nt-arrows { flex: 4 1 0; }
+.nt-edit { flex: 2.6 1 0; }
+.nt-key { flex: 1 1 0; min-width: 44px; padding: 0 10px; font-family: var(--nt-mono-font); font-size: 12px; }
+.nt-arrows .nt-key { font-size: 19px; }
+.nt-edit .nt-key { font-size: 11px; }
+.nt-extra {
+  width: 100%; max-width: 1040px; max-height: max(80px, calc(var(--nt-app-height) - 240px));
+  margin: 10px auto 0; padding-top: 10px; overflow-y: auto;
+  overscroll-behavior: contain; scrollbar-width: thin; border-top: 1px solid var(--nt-border);
+}
+.nt-shortcuts { display: flex; gap: 6px; max-width: 100%; padding: 3px 3px 7px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; scrollbar-color: #344154 transparent; -webkit-overflow-scrolling: touch; }
+.nt-shortcuts .nt-key { flex: 0 0 auto; min-width: 64px; font-size: 11px; }
+.nt-hint { margin: 3px 3px 0; color: var(--nt-muted); font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.nt-modifier-picker { margin: 0 0 9px; padding: 0 3px 9px; border-bottom: 1px solid var(--nt-border); }
+.nt-picker-label { margin: 0 0 7px; color: var(--nt-accent); font-size: 11px; line-height: 1.5; }
+.nt-letter-grid { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 4px; }
+.nt-letter-grid .nt-letter { min-width: 0; min-height: 36px; padding: 0 3px; font-size: 12px; }
+/* Keep native dialog closed until showModal(); no unconditional display rule. */
+.nt-dialog {
+  position: fixed; inset: auto; top: calc(var(--nt-app-top) + var(--nt-app-height) / 2); left: 50%;
+  width: 560px; max-width: calc(100% - 32px); max-height: calc(var(--nt-app-height) - 32px); margin: 0; padding: 22px;
+  overflow: auto; border: 1px solid #364359; border-radius: 12px; background: var(--nt-panel); color: var(--nt-text);
+  font-family: var(--nt-ui-font); box-shadow: 0 24px 80px #0008; transform: translate(-50%, -50%); scrollbar-width: thin;
+}
+.nt-dialog::backdrop { background: #03070dc4; backdrop-filter: blur(4px); }
+.nt-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.nt-dialog-header h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.2px; }
+.nt-dialog-header > button { flex: 0 0 auto; }
+.nt-dialog-description { margin: 8px 0 16px; color: var(--nt-muted); font-size: 12px; line-height: 1.7; }
+.nt-dialog textarea { display: block; width: 100%; height: 180px; max-height: max(60px, calc(var(--nt-app-height) - 250px)); min-height: 60px; padding: 12px; resize: vertical; border: 1px solid #344154; border-radius: 8px; background: #0b111a; color: var(--nt-text); font-family: var(--nt-mono-font); font-size: 16px; line-height: 1.5; caret-color: var(--nt-mint); }
+.nt-dialog textarea::placeholder { color: #65748a; }
+.nt-warning { margin: 12px 0 0; padding: 10px 12px; border: 1px solid #655335; border-radius: 8px; background: #282318; color: #e4c995; font-size: 12px; line-height: 1.6; }
+.nt-confirm { display: flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 8px; color: #c1ccdc; font-size: 12px; line-height: 1.5; cursor: pointer; }
+.nt-confirm input { flex: 0 0 auto; width: 18px; height: 18px; margin: 0; accent-color: var(--nt-accent); }
+.nt-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.nt-toast {
+  position: fixed; z-index: 30; top: calc(var(--nt-app-top) + var(--nt-app-height) - var(--nt-dock-h) - 12px); left: 50%;
+  width: max-content; max-width: min(420px, calc(100% - 32px)); margin: 0; padding: 11px 16px; border: 1px solid #3b4c64; border-radius: 10px;
+  background: #1a2533; color: var(--nt-text); font-family: var(--nt-ui-font); font-size: 12px; line-height: 1.5; text-align: center; overflow-wrap: anywhere;
+  box-shadow: 0 6px 24px #0005; pointer-events: none; transform: translate(-50%, -100%);
+}
+@media (hover: hover) {
+  .nt-button:not(:disabled):hover, .nt-key:not(:disabled):hover { border-color: #52617b; background: #243044; color: #f0f3ff; }
+  .nt-button[aria-pressed="true"]:not(:disabled):hover, .nt-key[aria-pressed="true"]:not(:disabled):hover { border-color: #939be2; background: #333e60; }
+}
+@media (pointer: coarse) { .nt-touch-only { display: inline-flex; } }
+@media (max-width: 1000px) {
+  .nt-icon-button .nt-button-label { display: none; }
+  .nt-header { gap: 14px; padding-right: 14px; padding-left: 14px; }
+  .nt-top-actions { gap: 2px; }
+  .nt-dock-main { gap: 12px; }
+}
+@media (min-width: 641px) and (max-width: 800px) {
+  #nt-status-label { display: none; }
+  .nt-header { gap: 10px; }
+  #nt-reconnect { position: absolute; top: calc(100% + 6px); right: 14px; z-index: 12; }
+}
+@media (max-width: 640px) {
+  .nt-header { gap: 8px; min-height: 56px; padding: 6px 10px; }
+  .nt-brand { gap: 8px; }
+  .nt-logo { width: 30px; height: 30px; border-radius: 8px; }
+  .nt-brand-copy strong { font-size: 11px; letter-spacing: 1px; }
+  .nt-brand-copy small, #nt-status-label, .nt-desktop-only { display: none; }
+  .nt-status { gap: 0; margin-left: auto; }
+  .nt-status-dot { width: 5px; height: 5px; }
+  .nt-top-actions { flex: 0 0 auto; gap: 0; margin-left: 0; }
+  .nt-icon-button { width: 44px; padding: 0; }
+  .nt-touch-only, .nt-mobile-only { display: inline-flex; }
+  #nt-reconnect { position: absolute; top: calc(100% + 6px); right: 10px; z-index: 12; background: #243044; box-shadow: 0 4px 12px #0005; }
+  .nt-dock { padding: 9px 10px calc(9px + env(safe-area-inset-bottom, 0px)); }
+  .nt-dock-main { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+  .nt-modifiers { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .nt-arrows { grid-column: 1 / span 4; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .nt-edit { grid-column: 5 / span 2; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nt-key-group { gap: 6px; }
+  .nt-key { min-width: 0; min-height: 44px; padding: 0 3px; font-size: 11px; }
+  .nt-edit .nt-key { font-size: 9px; letter-spacing: -.35px; }
+  .nt-arrows .nt-key { font-size: 19px; }
+  .nt-extra { margin-top: 8px; padding-top: 8px; }
+  .nt-hint { font-size: 10px; }
+  .nt-letter-grid {
+    grid-template-columns: none; grid-template-rows: repeat(2, 36px);
+    grid-auto-flow: column; grid-auto-columns: calc((100% - 32px) / 9);
+    padding: 3px 0 7px; overflow-x: auto; overscroll-behavior-x: contain;
+    scrollbar-width: thin; scrollbar-color: #344154 transparent;
+  }
+  .nt-dialog { padding: 16px; }
+  .nt-dialog-header h2 { font-size: 16px; }
+  .nt-dialog-actions { margin-top: 14px; }
+  .nt-dialog-actions .nt-button { flex: 1 1 auto; }
+  html.nt-enhanced body #terminal-container .terminal { padding: 8px !important; }
+}
+/* Short landscape: keep every base key visible in a single row. */
+@media (min-width: 600px) and (max-height: 480px) {
+  .nt-header { min-height: 52px; padding-top: 4px; padding-bottom: 4px; }
+  .nt-brand-copy small { display: none; }
+  .nt-dock { padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .nt-dock-main { display: flex; gap: 8px; }
+  .nt-key-group { display: flex; gap: 4px; }
+  .nt-modifiers { flex: 5 1 0; }
+  .nt-arrows { flex: 4 1 0; }
+  .nt-edit { flex: 2.4 1 0; }
+  .nt-key { min-width: 0; padding-right: 3px; padding-left: 3px; font-size: 10px; }
+  .nt-edit .nt-key { font-size: 9px; letter-spacing: -.4px; }
+  .nt-extra { margin-top: 6px; padding-top: 5px; }
+  .nt-hint { margin-top: 0; font-size: 10px; }
+  .nt-letter-grid { grid-template-columns: repeat(13, minmax(0, 1fr)); }
+  .nt-dialog { padding: 12px 16px; }
+  .nt-dialog-description { margin: 4px 0 10px; }
+  .nt-dialog-actions { margin-top: 10px; }
+}
+@keyframes nt-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) {
+  .nt-button, .nt-key { transition: none; }
+  .nt-status[data-state="connecting"] .nt-status-dot { animation: none; }
+  .nt-shortcuts { scroll-behavior: auto; }
+}
+@media (forced-colors: active) {
+  .nt-status-dot { border: 1px solid CanvasText; }
+  .nt-button[aria-pressed="true"], .nt-key[aria-pressed="true"] { outline: 2px solid Highlight; outline-offset: -3px; }
+}

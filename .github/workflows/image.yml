@@ -46,6 +46,19 @@ jobs:
           export WEBTERM_IMAGE=nas-webterm:validation
           docker compose -f compose.yaml config --quiet
           docker compose -f compose.build.yaml config --quiet
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.28.5'
+      - name: Test terminal-key encoders
+        run: pnpm test
+      - name: Install browser test dependencies
+        if: matrix.arch == 'amd64'
+        run: |
+          pnpm install --frozen-lockfile --ignore-scripts
+          pnpm exec playwright install --with-deps chromium
       - name: Prepare image name
         shell: bash
         run: |
@@ -78,7 +91,18 @@ jobs:
       - name: Smoke test
         env:
           TEST_IMAGE: ${{ env.IMAGE }}:sha-${{ github.sha }}-${{ matrix.arch }}
+          RUN_BROWSER_TESTS: ${{ matrix.arch == 'amd64' && '1' || '0' }}
         run: bash tests/smoke.sh
+      - name: Save browser test reports
+        if: always() && matrix.arch == 'amd64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-tests
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
       - name: Publish architecture image
         if: github.event_name != 'pull_request'
         shell: bash

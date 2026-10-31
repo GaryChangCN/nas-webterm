@@ -19,6 +19,7 @@ echo '[webterm] Starting authenticated terminal on port 7681.'
 exec ttyd \
     --port 7681 \
     --interface 0.0.0.0 \
+    --index /usr/share/nas-webterm/index.html \
     --credential "${USER_NAME}:${PASS}" \
     --writable \
     --check-origin \

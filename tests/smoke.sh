@@ -46,4 +46,8 @@ code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
 docker exec "$name" sh -c 'command -v ttyd && command -v bash && command -v ssh && command -v tmux'
 docker exec "$name" sh -n /usr/local/bin/entrypoint.sh
 docker exec "$name" /usr/local/bin/healthcheck.sh
-echo 'Authentication and installed-tool smoke tests passed.'
+docker exec "$name" sh -c 'test -s /usr/share/nas-webterm/index.html && grep -q nt-webterm-controls /usr/share/nas-webterm/index.html'
+if [[ "${RUN_BROWSER_TESTS:-0}" == 1 ]]; then
+  pnpm exec playwright test
+fi
+echo 'Authentication, frontend, and installed-tool smoke tests passed.'
