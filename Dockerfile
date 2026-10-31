@@ -1,4 +1,4 @@
-FROM alpine:3.22 AS frontend
+FROM alpine:3.24 AS frontend
 ARG TTYD_VERSION=1.7.7-r0
 RUN apk add --no-cache "ttyd=${TTYD_VERSION}" python3
 WORKDIR /build
@@ -6,7 +6,7 @@ COPY web/ ./web/
 COPY scripts/build_frontend.py ./scripts/build_frontend.py
 RUN python3 scripts/build_frontend.py --output /build/index.html
 
-FROM alpine:3.22
+FROM alpine:3.24
 ARG TTYD_VERSION=1.7.7-r0
 RUN apk add --no-cache \
         "ttyd=${TTYD_VERSION}" bash openssh-client tmux ncurses-terminfo-base \
